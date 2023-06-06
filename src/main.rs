@@ -7,14 +7,10 @@ fn main() -> eframe::Result<()> {
     // Log to stdout (if you run with `RUST_LOG=debug`).
     tracing_subscriber::fmt::init();
 
-    let native_options = eframe::NativeOptions::default();
-    eframe::run_native(
-        "df",
-        native_options,
-        Box::new(|cc| Box::new(df::TemplateApp::new(cc))),
-    )
+    df::run()
 }
 
+/*
 // when compiling to web using trunk.
 #[cfg(target_arch = "wasm32")]
 fn main() {
@@ -36,3 +32,4 @@ fn main() {
         .expect("failed to start eframe");
     });
 }
+ */
