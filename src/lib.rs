@@ -3,6 +3,8 @@
 mod image_storage;
 mod ui;
 
+use std::mem;
+
 use crate::image_storage::ImageStorage;
 use df_client::{
     api::auction::{SortOrder, WordType},
@@ -99,7 +101,9 @@ impl App {
             },
         };
 
-        if self.search_state.results.replace(new) {
+        let old = &mut self.search_state.results;
+        if new.is_done() || !old.is_done() {
+            old.replace(new);
             self.search_state.sort_asc = true;
         }
 
@@ -152,11 +156,14 @@ impl<T, E> PromiseState<T, E> {
         matches!(self, Self::Ok(_) | Self::Err(_))
     }
 
-    fn replace(&mut self, new: Self) -> bool {
-        if new.is_done() || !self.is_done() {
-            *self = new;
-            return true;
+    fn replace(&mut self, new: Self) -> Self {
+        mem::replace(self, new)
+    }
+
+    fn get_mut(&mut self) -> Option<&mut T> {
+        match self {
+            Self::Ok(val) => Some(val),
+            _ => None,
         }
-        false
     }
 }
