@@ -65,7 +65,7 @@ impl Default for SearchState {
 
 impl App {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        df_client::initialise(include_str!("../apikey.txt"));
+        df_client::initialise(env!("API_KEY"));
 
         App::default()
     }
