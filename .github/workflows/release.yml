@@ -27,3 +27,5 @@ jobs:
           bin: df
           zip: windows
           target: x86_64-pc-windows-msvc
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
