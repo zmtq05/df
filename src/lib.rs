@@ -7,7 +7,7 @@ use std::mem;
 
 use crate::image_storage::ImageStorage;
 use df_client::{
-    api::auction::{SortOrder, WordType},
+    api::{auction::SortOrder, WordType},
     model::AuctionInfo,
 };
 use eframe::NativeOptions;
