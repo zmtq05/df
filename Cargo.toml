@@ -17,32 +17,33 @@ eframe = { version = "0.22.0", default-features = false, features = [
 serde = { version = "1", features = ["derive"] }
 
 df-client = { git = "https://github.com/zmtq05/df-rs" }
-tokio = { version = "1.28.2", features = ["rt-multi-thread", "parking_lot"] }
 egui_extras = { version = "0.22.0", features = ["image"] }
 image = { version = "0.24", features = ["png"] }
 thousands = "0.2.0"
 egui-phosphor = "0.1.1"
 
-[dependencies.poll-promise]
-# 0.2 version has bug in release build
-# https://github.com/EmbarkStudios/poll-promise/issues/18
-git = "https://github.com/EmbarkStudios/poll-promise"
-rev = "refs/pull/14/head"
-features = ["tokio"]
-
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+poll-promise = { git = "https://github.com/EmbarkStudios/poll-promise", rev = "refs/pull/14/head", features = [
+    "tokio",
+] }
 tracing-subscriber = "0.3"
+tokio = { version = "1.28.2", features = ["rt-multi-thread", "parking_lot"] }
 
-# # web:
-# [target.'cfg(target_arch = "wasm32")'.dependencies]
-# console_error_panic_hook = "0.1.6"
-# tracing-wasm = "0.2"
-# wasm-bindgen-futures = "0.4"
+# web:
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-futures = "0.4"
+# 0.2 version has bug in release build
+# https://github.com/EmbarkStudios/poll-promise/issues/18
+poll-promise = { git = "https://github.com/EmbarkStudios/poll-promise", rev = "refs/pull/14/head", features = [
+    "web",
+] }
+log = "0.4"
+# tokio = { version = "1.28.2", features = ["rt"] }
 
 
-# [profile.release]
-# opt-level = 2 # fast and small wasm
+[profile.release]
+opt-level = 2 # fast and small wasm
 
 # Optimize all dependencies even in debug builds:
 [profile.dev.package."*"]

@@ -4,6 +4,8 @@ use df_client::util::AsItem;
 use egui_extras::RetainedImage;
 use poll_promise::Promise;
 
+use crate::spawn_promise;
+
 #[derive(Default)]
 pub struct ImageStorage {
     storage: HashMap<String, RetainedImage>,
@@ -23,7 +25,7 @@ impl ImageStorage {
         }
 
         let name = item.name().to_owned();
-        let promise = Promise::spawn_async(async move {
+        let promise = spawn_promise(async move {
             df_client::instance()
                 .image()
                 ._item(&id)

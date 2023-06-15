@@ -3,41 +3,20 @@
 mod image_storage;
 mod ui;
 
-use std::mem;
+use std::{future::Future, mem};
 
 use crate::image_storage::ImageStorage;
 use df_client::{
     api::{auction::SortOrder, WordType},
     model::AuctionInfo,
 };
-use eframe::NativeOptions;
 use egui::{FontData, FontDefinitions, FontFamily};
 use poll_promise::Promise;
-
-pub fn run() -> Result<(), eframe::Error> {
-    tracing_subscriber::fmt::init();
-
-    let rt = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-    let _enter = rt.enter();
-
-    let native_options = NativeOptions::default();
-    eframe::run_native(
-        "df", // TODO: change app name
-        native_options,
-        Box::new(|cc| {
-            load_font(cc);
-            Box::new(App::new(cc))
-        }),
-    )
-}
 
 type Result<T, E = df_client::Error> = std::result::Result<T, E>;
 
 #[derive(Default)]
-struct App {
+pub struct App {
     input: String,
 
     search_state: SearchState,
@@ -63,8 +42,26 @@ impl Default for SearchState {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+fn spawn_promise<F, T>(future: F) -> Promise<T>
+where
+    F: Future<Output = T> + 'static + Send,
+    T: 'static + Send,
+{
+    Promise::spawn_async(future)
+}
+
+#[cfg(target_arch = "wasm32")]
+fn spawn_promise<F, T>(future: F) -> Promise<T>
+where
+    F: Future<Output = T> + 'static,
+    T: 'static + Send,
+{
+    Promise::spawn_local(future)
+}
+
 impl App {
-    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         df_client::initialise(env!("API_KEY"));
 
         App::default()
@@ -77,7 +74,7 @@ impl App {
         }
 
         let item_name = self.input.clone();
-        self.search_state.promise = Some(Promise::spawn_async(async move {
+        self.search_state.promise = Some(spawn_promise(async move {
             df_client::instance()
                 .auction()
                 .item_name(item_name)
@@ -119,7 +116,7 @@ impl eframe::App for App {
     }
 }
 
-fn load_font(cc: &eframe::CreationContext<'_>) {
+pub fn load_font(cc: &eframe::CreationContext<'_>) {
     let mut fonts = FontDefinitions::default();
     egui_phosphor::add_to_fonts(&mut fonts);
 

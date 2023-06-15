@@ -4,29 +4,48 @@
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    df::run().unwrap();
+    use df::{load_font, App};
+    tracing_subscriber::fmt::init();
+
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    let _enter = rt.enter();
+
+    let native_options = eframe::NativeOptions::default();
+    eframe::run_native(
+        "df", // TODO: change app name
+        native_options,
+        Box::new(|cc| {
+            load_font(cc);
+            Box::new(App::new(cc))
+        }),
+    )
+    .unwrap();
 }
 
-/*
 // when compiling to web using trunk.
 #[cfg(target_arch = "wasm32")]
 fn main() {
-    // Make sure panics are logged using `console.error`.
-    console_error_panic_hook::set_once();
+    use df::{load_font, App};
 
-    // Redirect tracing to console.log and friends:
-    tracing_wasm::set_as_global_default();
+    eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
     let web_options = eframe::WebOptions::default();
 
+    // TODO: resolve CORS issue
     wasm_bindgen_futures::spawn_local(async {
-        eframe::start_web(
-            "the_canvas_id", // hardcode it
-            web_options,
-            Box::new(|cc| Box::new(eframe_template::TemplateApp::new(cc))),
-        )
-        .await
-        .expect("failed to start eframe");
+        eframe::WebRunner::new()
+            .start(
+                "the_canvas_id",
+                web_options,
+                Box::new(|cc| {
+                    load_font(cc);
+                    Box::new(App::new(cc))
+                }),
+            )
+            .await
+            .expect("failed to start web runner");
     });
 }
- */
