@@ -6,14 +6,14 @@ mod ui;
 use std::{future::Future, mem};
 
 use crate::image_storage::ImageStorage;
-use df_client::{
+use df_rs::{
     api::{auction::SortOrder, WordType},
     model::AuctionInfo,
 };
 use egui::{FontData, FontDefinitions, FontFamily};
 use poll_promise::Promise;
 
-type Result<T, E = df_client::Error> = std::result::Result<T, E>;
+type Result<T, E = df_rs::Error> = std::result::Result<T, E>;
 
 #[derive(Default)]
 pub struct App {
@@ -25,9 +25,9 @@ pub struct App {
 }
 
 struct SearchState {
-    results: PromiseState<Vec<AuctionInfo>, df_client::Error>,
+    results: PromiseState<Vec<AuctionInfo>, df_rs::Error>,
     error_msg: String,
-    promise: Option<Promise<Result<Vec<AuctionInfo>, df_client::Error>>>,
+    promise: Option<Promise<Result<Vec<AuctionInfo>, df_rs::Error>>>,
     sort_asc: bool,
 }
 
@@ -62,7 +62,7 @@ where
 
 impl App {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        df_client::initialise(env!("API_KEY"));
+        df_rs::initialize(env!("API_KEY"));
 
         App::default()
     }
@@ -75,11 +75,11 @@ impl App {
 
         let item_name = self.input.clone();
         self.search_state.promise = Some(spawn_promise(async move {
-            df_client::instance()
+            df_rs::instance()
                 .auction()
-                .item_name(item_name)
+                .name(item_name)
                 .limit(50)
-                .word_type(WordType::Front)
+                .word_type(WordType::Full)
                 .sort_by_unit_price(SortOrder::Asc)
                 .search()
                 .await

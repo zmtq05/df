@@ -1,6 +1,6 @@
 use std::collections::{HashMap, VecDeque};
 
-use df_client::util::AsItem;
+use df_rs::util::AsItem;
 use egui_extras::RetainedImage;
 use poll_promise::Promise;
 
@@ -26,7 +26,7 @@ impl ImageStorage {
 
         let name = item.name().to_owned();
         let promise = spawn_promise(async move {
-            df_client::instance()
+            df_rs::instance()
                 .image()
                 ._item(&id)
                 .await

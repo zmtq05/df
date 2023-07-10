@@ -1,4 +1,4 @@
-use df_client::model::AuctionInfo;
+use df_rs::model::AuctionInfo;
 use egui::{
     Align, CentralPanel, Context, Event, FontId, InputState, Key, Layout, Spinner, TextEdit, Ui,
     WidgetText,
